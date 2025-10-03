@@ -5,11 +5,12 @@ from datetime import datetime
 
 class Database:
     def __init__(self):
-        self.host = "127.0.0.1"
-        self.port = 3316
-        self.user = "root"
-        self.password = "root"
-        self.database = "176App"
+        # Use environment variables with defaults
+        self.host = os.getenv("DB_HOST", "127.0.0.1")
+        self.port = int(os.getenv("DB_PORT", "3316"))
+        self.user = os.getenv("DB_USER", "root")
+        self.password = os.getenv("DB_PASSWORD", "root")
+        self.database = os.getenv("DB_NAME", "176App")
         
         # Create database and tables if they don't exist
         self._initialize_database()

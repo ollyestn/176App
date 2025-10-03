@@ -1,0 +1,31 @@
+services:
+  app:
+    build: .
+    ports:
+      - "9092:9092"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+      - DB_NAME=176App
+    depends_on:
+      - mysql
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./static:/app/static
+      - ./templates:/app/templates
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=176App
+    ports:
+      - "3316:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
