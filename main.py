@@ -94,6 +94,21 @@ async def download_result(comparison_id: str):
 async def meeting_page(request: Request):
     # Get history records for current user
     history_records = meeting_service.get_history()  # Placeholder
+
+    # 将history_records的每条记录的audio_path或video_path截取第45个字符之后的字符串
+    history_records = [
+        {
+            "id": record["id"],
+            "audio_path": record["audio_path"][45:] if record["audio_path"] else None,
+            "video_path": record["video_path"][45:] if record["video_path"] else None,
+            "raw_text_path": record["raw_text_path"],
+            "processed_text_path": record["processed_text_path"],
+            "created_at": record["created_at"],
+            "user_id": record["user_id"]
+        }
+        for record in history_records
+    ]
+
     
     return templates.TemplateResponse("meeting.html", {
         "request": request,
@@ -123,7 +138,7 @@ async def transcribe_meeting(
             buffer.write(await video_file.read())
     
     # Perform transcription and processing
-    raw_text_path = f"results/{transcription_id}_raw.docx"
+    raw_text_path = f"results/{transcription_id}_raw.txt"
     processed_text_path = f"results/{transcription_id}_processed.docx"
     
     success = meeting_service.transcribe_and_process(
@@ -143,17 +158,60 @@ async def transcribe_meeting(
 
 @app.get("/download/raw/{transcription_id}")
 async def download_raw_text(transcription_id: str):
-    file_path = f"results/{transcription_id}_raw.docx"
+    file_path = f"results/{transcription_id}_raw.txt"
+    print(f"想下载：{file_path}")
+
+    # 从数据库查询transcription_id记录，取audio_path or video_path从45开始的字符串,去掉文件后缀，做为输出的文件名
+    # Get the transcription record from database
+    transcription_record = meeting_service.get_transcription_by_id(transcription_id)
+    
+    # Extract original filename
+    original_filename = "raw_transcript.txt"  # default filename
+    if transcription_record:
+        # Get audio_path or video_path
+        audio_path = transcription_record.get("audio_path")
+        video_path = transcription_record.get("video_path")
+        
+        # Extract filename from path
+        file_source = audio_path or video_path
+        if file_source:
+            # Extract filename and remove extension
+            filename = os.path.basename(file_source)    
+            name_without_ext = os.path.splitext(filename)[0]
+            # 取name_without_ext从第45个开始的字符串
+            name_without_ext = name_without_ext[45:]
+            original_filename = f"{name_without_ext}_raw.txt"
+            print(f"ORIGINAL FILENAME:{original_filename}")
+
     if os.path.exists(file_path):
-        return FileResponse(file_path, filename=f"raw_transcript_{transcription_id}.docx")
+        return FileResponse(file_path, filename=original_filename)
     else:
         return {"error": "File not found"}
 
 @app.get("/download/processed/{transcription_id}")
 async def download_processed_text(transcription_id: str):
     file_path = f"results/{transcription_id}_processed.docx"
+    
+    # Get the transcription record from database
+    transcription_record = meeting_service.get_transcription_by_id(transcription_id)
+    
+    # Extract original filename
+    original_filename = "processed_transcript.docx"  # default filename
+    if transcription_record:
+        # Get audio_path or video_path
+        audio_path = transcription_record.get("audio_path")
+        video_path = transcription_record.get("video_path")
+        
+        # Extract filename from path
+        file_source = audio_path or video_path
+        if file_source:
+            # Extract filename and remove extension
+            filename = os.path.basename(file_source)
+            name_without_ext = os.path.splitext(filename)[0]
+            original_filename = f"{name_without_ext}_processed.docx"
+
     if os.path.exists(file_path):
-        return FileResponse(file_path, filename=f"processed_transcript_{transcription_id}.docx")
+        return FileResponse(file_path, filename=original_filename)
     else:
         return {"error": "File not found"}
 

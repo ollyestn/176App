@@ -5,8 +5,8 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h1>Document Comparison</h1>
-        <p>Upload two Word documents to compare their content.</p>
+        <h1>文档比较</h1>
+        <p>上传两个Word文档以比较其内容。</p>
     </div>
 </div>
 
@@ -20,29 +20,33 @@
                 <form id="compareForm" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Document 1</label>
-                            <div class="upload-area" id="uploadArea1" onclick="document.getElementById('file1').click()">
+                            <label class="form-label">文档 1</label>
+                            <div class="upload-area" id="uploadArea1"
+                                onclick="document.getElementById('file1').click()">
                                 <p id="file1Name" class="mb-0">Click to select a DOC or DOCX file</p>
-                                <input type="file" id="file1" name="file1" accept=".doc,.docx" class="d-none" onchange="updateFileName(1)">
+                                <input type="file" id="file1" name="file1" accept=".doc,.docx" class="d-none"
+                                    onchange="updateFileName(1)">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Document 2</label>
-                            <div class="upload-area" id="uploadArea2" onclick="document.getElementById('file2').click()">
+                            <label class="form-label">文档 2</label>
+                            <div class="upload-area" id="uploadArea2"
+                                onclick="document.getElementById('file2').click()">
                                 <p id="file2Name" class="mb-0">Click to select a DOC or DOCX file</p>
-                                <input type="file" id="file2" name="file2" accept=".doc,.docx" class="d-none" onchange="updateFileName(2)">
+                                <input type="file" id="file2" name="file2" accept=".doc,.docx" class="d-none"
+                                    onchange="updateFileName(2)">
                             </div>
                         </div>
                     </div>
                     <div class="d-grid mt-3">
-                        <button type="submit" class="btn btn-primary" id="compareBtn">Compare Documents</button>
+                        <button type="submit" class="btn btn-primary" id="compareBtn">比较</button>
                     </div>
                 </form>
                 <div id="resultArea" class="mt-4 d-none">
                     <h5>Comparison Result</h5>
                     <div class="alert alert-success">
                         <p>Documents compared successfully!</p>
-                        <a href="#" class="btn btn-success" id="downloadBtn">Download Comparison Result</a>
+                        <a href="#" class="btn btn-success" id="downloadBtn">下载比较结果</a>
                     </div>
                 </div>
             </div>
@@ -54,7 +58,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5>History</h5>
+                <h5>历史记录</h5>
             </div>
             <div class="card-body">
                 {% if history_records %}
@@ -62,9 +66,9 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Document 1</th>
-                                <th>Document 2</th>
+                                <th>日期</th>
+                                <th>文档 1</th>
+                                <th>文档 2</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -75,7 +79,8 @@
                                 <td>{{ record.file1_path.split('/')[-1] }}</td>
                                 <td>{{ record.file2_path.split('/')[-1] }}</td>
                                 <td>
-                                    <a href="/download/{{ record.id }}" class="btn btn-sm btn-primary">Download Result</a>
+                                    <a href="/download/{{ record.id }}" class="btn btn-sm btn-primary">Download
+                                        Result</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -93,64 +98,64 @@
 
 {% block scripts %}
 <script>
-function updateFileName(fileNum) {
-    const fileInput = document.getElementById('file' + fileNum);
-    const fileNameDisplay = document.getElementById('file' + fileNum + 'Name');
-    if (fileInput.files.length > 0) {
-        fileNameDisplay.textContent = fileInput.files[0].name;
-    }
-}
-
-document.getElementById('compareForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const file1 = document.getElementById('file1').files[0];
-    const file2 = document.getElementById('file2').files[0];
-    
-    if (!file1 || !file2) {
-        alert('Please select both files to compare.');
-        return;
-    }
-    
-    // Check file extensions
-    const validExtensions = ['.doc', '.docx'];
-    const ext1 = '.' + file1.name.split('.').pop().toLowerCase();
-    const ext2 = '.' + file2.name.split('.').pop().toLowerCase();
-    
-    if (!validExtensions.includes(ext1) || !validExtensions.includes(ext2)) {
-        alert('Please select only DOC or DOCX files.');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('file1', file1);
-    formData.append('file2', file2);
-    
-    const compareBtn = document.getElementById('compareBtn');
-    compareBtn.disabled = true;
-    compareBtn.textContent = 'Comparing...';
-    
-    fetch('/docchk/compare', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('resultArea').classList.remove('d-none');
-            document.getElementById('downloadBtn').href = data.download_url;
-        } else {
-            alert('Comparison failed: ' + data.error);
+    function updateFileName(fileNum) {
+        const fileInput = document.getElementById('file' + fileNum);
+        const fileNameDisplay = document.getElementById('file' + fileNum + 'Name');
+        if (fileInput.files.length > 0) {
+            fileNameDisplay.textContent = fileInput.files[0].name;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred during comparison.');
-    })
-    .finally(() => {
-        compareBtn.disabled = false;
-        compareBtn.textContent = 'Compare Documents';
+    }
+
+    document.getElementById('compareForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const file1 = document.getElementById('file1').files[0];
+        const file2 = document.getElementById('file2').files[0];
+
+        if (!file1 || !file2) {
+            alert('Please select both files to compare.');
+            return;
+        }
+
+        // Check file extensions
+        const validExtensions = ['.doc', '.docx'];
+        const ext1 = '.' + file1.name.split('.').pop().toLowerCase();
+        const ext2 = '.' + file2.name.split('.').pop().toLowerCase();
+
+        if (!validExtensions.includes(ext1) || !validExtensions.includes(ext2)) {
+            alert('Please select only DOC or DOCX files.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file1', file1);
+        formData.append('file2', file2);
+
+        const compareBtn = document.getElementById('compareBtn');
+        compareBtn.disabled = true;
+        compareBtn.textContent = 'Comparing...';
+
+        fetch('/docchk/compare', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('resultArea').classList.remove('d-none');
+                    document.getElementById('downloadBtn').href = data.download_url;
+                } else {
+                    alert('Comparison failed: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during comparison.');
+            })
+            .finally(() => {
+                compareBtn.disabled = false;
+                compareBtn.textContent = 'Compare Documents';
+            });
     });
-});
 </script>
 {% endblock %}

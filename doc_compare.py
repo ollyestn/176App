@@ -1,13 +1,14 @@
 import os
 import sys
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from database import Database
 
-# Try to import the doc_checker module
+# Handle conditional import for static analysis tools
 try:
     import doc_checker
     HAS_DOC_CHECKER = True
 except ImportError:
+    doc_checker = None  # Assign None to satisfy static analysis
     HAS_DOC_CHECKER = False
     print("Warning: doc_checker.py not found. Document comparison will be simulated.")
 
@@ -21,7 +22,7 @@ class DocCompare:
         Returns True if successful, False otherwise
         """
         try:
-            if HAS_DOC_CHECKER:
+            if HAS_DOC_CHECKER and doc_checker is not None:
                 # Use the actual doc_checker module
                 result = doc_checker.main(file1_path, file2_path, result_path)
                 return result is not None  # Assuming main returns something on success
@@ -47,10 +48,10 @@ class DocCompare:
         # Rename to .xlsx extension to match expected format
         os.rename(result_path.replace('.xlsx', '.txt'), result_path)
     
-    def save_record(self, comparison_id: str, file1_path: str, file2_path: str, result_path: str, user_id: str = None):
+    def save_record(self, comparison_id: str, file1_path: str, file2_path: str, result_path: str, user_id: Optional[str] = None):
         """Save comparison record to database"""
-        self.db.save_doc_comparison(comparison_id, file1_path, file2_path, result_path, user_id)
+        self.db.save_doc_comparison(comparison_id, file1_path, file2_path, result_path, user_id or "")
     
-    def get_history(self, user_id: str = None) -> List[Dict[str, Any]]:
+    def get_history(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get document comparison history"""
-        return self.db.get_doc_comparisons(user_id)
+        return self.db.get_doc_comparisons(user_id or "")

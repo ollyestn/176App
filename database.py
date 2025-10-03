@@ -1,5 +1,5 @@
 import mysql.connector
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import os
 from datetime import datetime
 
@@ -9,7 +9,7 @@ class Database:
         self.port = 3316
         self.user = "root"
         self.password = "root"
-        self.database = "document_comparison"
+        self.database = "176App"
         
         # Create database and tables if they don't exist
         self._initialize_database()
@@ -73,7 +73,7 @@ class Database:
         cursor.close()
         conn.close()
     
-    def save_doc_comparison(self, comparison_id: str, file1_path: str, file2_path: str, result_path: str, user_id: str = None):
+    def save_doc_comparison(self, comparison_id: str, file1_path: str, file2_path: str, result_path: str, user_id: Optional[str] = None):
         """Save document comparison record to database"""
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -87,7 +87,7 @@ class Database:
         cursor.close()
         conn.close()
     
-    def get_doc_comparisons(self, user_id: str = None) -> List[Dict[str, Any]]:
+    def get_doc_comparisons(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Retrieve document comparison history"""
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -108,7 +108,7 @@ class Database:
         return results
     
     def save_meeting_transcription(self, transcription_id: str, audio_path: str, video_path: str, 
-                                  raw_text_path: str, processed_text_path: str, user_id: str = None):
+                                  raw_text_path: str, processed_text_path: str, user_id: Optional[str] = None):
         """Save meeting transcription record to database"""
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -122,7 +122,20 @@ class Database:
         cursor.close()
         conn.close()
     
-    def get_meeting_transcriptions(self, user_id: str = None) -> List[Dict[str, Any]]:
+    def get_meeting_transcription_by_id(self, transcription_id: str) -> Dict[str, Any]:
+        """Retrieve a specific meeting transcription by ID"""
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("SELECT * FROM meeting_transcriptions WHERE id = %s", (transcription_id,))
+        
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        return result if result else {}  # type: ignore
+
+    def get_meeting_transcriptions(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Retrieve meeting transcription history"""
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -140,4 +153,4 @@ class Database:
         cursor.close()
         conn.close()
         
-        return results
+        return results  # type: ignore

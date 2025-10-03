@@ -7,6 +7,7 @@ try:
     import video_transcription
     HAS_VIDEO_TRANSCRIPTION = True
 except ImportError:
+    video_transcription = None  # Explicitly set to None
     HAS_VIDEO_TRANSCRIPTION = False
     print("Warning: video_transcription.py not found. Transcription will be simulated.")
 
@@ -14,20 +15,21 @@ class MeetingTranscribe:
     def __init__(self):
         self.db = Database()
     
-    def transcribe_and_process(self, audio_path: str, video_path: str, raw_text_path: str, processed_text_path: str) -> bool:
+    def transcribe_and_process(self, audio_path: Optional[str], video_path: Optional[str], raw_text_path: str, processed_text_path: str) -> bool:
         """
         Transcribe audio/video and process the text
         Returns True if successful, False otherwise
         """
         try:
-            if HAS_VIDEO_TRANSCRIPTION:
-                # Use the actual video_transcription module
-                # Check if the module was successfully imported
-                if 'video_transcription' in globals():
-                    result = video_transcription.process(audio_path or video_path, raw_text_path, processed_text_path)
+            # Use the actual video_transcription module if available
+            if HAS_VIDEO_TRANSCRIPTION and video_transcription is not None:
+                # Choose the available file path (audio or video)
+                input_file = audio_path or video_path
+                if input_file:
+                    result = video_transcription.process(input_file, raw_text_path, processed_text_path)
                     return result is not None  # Assuming process returns something on success
             # Simulate transcription for development
-            self._simulate_transcription(audio_path, video_path, raw_text_path, processed_text_path)
+            self._simulate_transcription(audio_path or "", video_path or "", raw_text_path, processed_text_path)
             return True
         except Exception as e:
             print(f"Error during transcription: {e}")
@@ -55,10 +57,14 @@ class MeetingTranscribe:
         # Rename to .docx extension
         os.rename(processed_text_path.replace('.docx', '.txt'), processed_text_path)
     
-    def save_record(self, transcription_id: str, audio_path: str, video_path: str, 
+    def save_record(self, transcription_id: str, audio_path: Optional[str], video_path: Optional[str], 
                    raw_text_path: str, processed_text_path: str, user_id: Optional[str] = None):
         """Save transcription record to database"""
-        self.db.save_meeting_transcription(transcription_id, audio_path, video_path, raw_text_path, processed_text_path, user_id or "")
+        self.db.save_meeting_transcription(transcription_id, audio_path or "", video_path or "", raw_text_path, processed_text_path, user_id or "")
+
+    def get_transcription_by_id(self, transcription_id: str) -> Dict[str, Any]:
+        """Get a specific transcription by ID"""
+        return self.db.get_meeting_transcription_by_id(transcription_id)
 
     def get_history(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get transcription history"""

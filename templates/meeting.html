@@ -5,8 +5,8 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h1>Meeting Transcription</h1>
-        <p>Upload an audio or video recording of a meeting to transcribe and organize the content.</p>
+        <h1>会议记录</h1>
+        <p>上传会议的音频或视频记录以转录和组织内容。</p>
     </div>
 </div>
 
@@ -14,36 +14,40 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5>Transcribe Meeting</h5>
+                <h5>转录会议</h5>
             </div>
             <div class="card-body">
                 <form id="transcribeForm" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Audio File (MP3)</label>
-                            <div class="upload-area" id="audioUploadArea" onclick="document.getElementById('audioFile').click()">
+                            <div class="upload-area" id="audioUploadArea"
+                                onclick="document.getElementById('audioFile').click()">
                                 <p id="audioFileName" class="mb-0">Click to select an MP3 file</p>
-                                <input type="file" id="audioFile" name="audio_file" accept=".mp3" class="d-none" onchange="updateAudioFileName()">
+                                <input type="file" id="audioFile" name="audio_file" accept=".mp3" class="d-none"
+                                    onchange="updateAudioFileName()">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Video File (MP4)</label>
-                            <div class="upload-area" id="videoUploadArea" onclick="document.getElementById('videoFile').click()">
+                            <div class="upload-area" id="videoUploadArea"
+                                onclick="document.getElementById('videoFile').click()">
                                 <p id="videoFileName" class="mb-0">Click to select an MP4 file</p>
-                                <input type="file" id="videoFile" name="video_file" accept=".mp4" class="d-none" onchange="updateVideoFileName()">
+                                <input type="file" id="videoFile" name="video_file" accept=".mp4" class="d-none"
+                                    onchange="updateVideoFileName()">
                             </div>
                         </div>
                     </div>
                     <div class="d-grid mt-3">
-                        <button type="submit" class="btn btn-success" id="transcribeBtn">Transcribe Meeting</button>
+                        <button type="submit" class="btn btn-success" id="transcribeBtn">转录</button>
                     </div>
                 </form>
                 <div id="resultArea" class="mt-4 d-none">
-                    <h5>Transcription Result</h5>
+                    <h5>转录结果</h5>
                     <div class="alert alert-success">
                         <p>Meeting transcribed successfully!</p>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <a href="#" class="btn btn-success me-md-2" id="rawDownloadBtn">Download Raw Transcript</a>
+                            <a href="#" class="btn btn-success me-md-2" id="rawDownloadBtn">下载转录文本</a>
                             <a href="#" class="btn btn-primary" id="processedDownloadBtn">Download Processed Notes</a>
                         </div>
                     </div>
@@ -57,7 +61,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5>History</h5>
+                <h5>转录历史</h5>
             </div>
             <div class="card-body">
                 {% if history_records %}
@@ -65,9 +69,9 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Audio File</th>
-                                <th>Video File</th>
+                                <th>日期</th>
+                                <th>音频文件</th>
+                                <th>视频文件</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -79,10 +83,12 @@
                                 <td>{{ record.video_path.split('/')[-1] if record.video_path else 'N/A' }}</td>
                                 <td>
                                     {% if record.raw_text_path %}
-                                        <a href="/download/raw/{{ record.id }}" class="btn btn-sm btn-success">Raw Transcript</a>
+                                    <a href="/download/raw/{{ record.id }}" class="btn btn-sm btn-success">Raw
+                                        Transcript</a>
                                     {% endif %}
                                     {% if record.processed_text_path %}
-                                        <a href="/download/processed/{{ record.id }}" class="btn btn-sm btn-primary">Processed Notes</a>
+                                    <a href="/download/processed/{{ record.id }}"
+                                        class="btn btn-sm btn-primary">Processed Notes</a>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -101,80 +107,80 @@
 
 {% block scripts %}
 <script>
-function updateAudioFileName() {
-    const fileInput = document.getElementById('audioFile');
-    const fileNameDisplay = document.getElementById('audioFileName');
-    if (fileInput.files.length > 0) {
-        fileNameDisplay.textContent = fileInput.files[0].name;
+    function updateAudioFileName() {
+        const fileInput = document.getElementById('audioFile');
+        const fileNameDisplay = document.getElementById('audioFileName');
+        if (fileInput.files.length > 0) {
+            fileNameDisplay.textContent = fileInput.files[0].name;
+        }
     }
-}
 
-function updateVideoFileName() {
-    const fileInput = document.getElementById('videoFile');
-    const fileNameDisplay = document.getElementById('videoFileName');
-    if (fileInput.files.length > 0) {
-        fileNameDisplay.textContent = fileInput.files[0].name;
+    function updateVideoFileName() {
+        const fileInput = document.getElementById('videoFile');
+        const fileNameDisplay = document.getElementById('videoFileName');
+        if (fileInput.files.length > 0) {
+            fileNameDisplay.textContent = fileInput.files[0].name;
+        }
     }
-}
 
-document.getElementById('transcribeForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const audioFile = document.getElementById('audioFile').files[0];
-    const videoFile = document.getElementById('videoFile').files[0];
-    
-    if (!audioFile && !videoFile) {
-        alert('Please select either an audio or video file to transcribe.');
-        return;
-    }
-    
-    // Check file extensions
-    if (audioFile) {
-        const ext = '.' + audioFile.name.split('.').pop().toLowerCase();
-        if (ext !== '.mp3') {
-            alert('Please select only MP3 audio files.');
+    document.getElementById('transcribeForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const audioFile = document.getElementById('audioFile').files[0];
+        const videoFile = document.getElementById('videoFile').files[0];
+
+        if (!audioFile && !videoFile) {
+            alert('Please select either an audio or video file to transcribe.');
             return;
         }
-    }
-    
-    if (videoFile) {
-        const ext = '.' + videoFile.name.split('.').pop().toLowerCase();
-        if (ext !== '.mp4') {
-            alert('Please select only MP4 video files.');
-            return;
+
+        // Check file extensions
+        if (audioFile) {
+            const ext = '.' + audioFile.name.split('.').pop().toLowerCase();
+            if (ext !== '.mp3') {
+                alert('Please select only MP3 audio files.');
+                return;
+            }
         }
-    }
-    
-    const formData = new FormData();
-    if (audioFile) formData.append('audio_file', audioFile);
-    if (videoFile) formData.append('video_file', videoFile);
-    
-    const transcribeBtn = document.getElementById('transcribeBtn');
-    transcribeBtn.disabled = true;
-    transcribeBtn.textContent = 'Transcribing...';
-    
-    fetch('/meeting/transcribe', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('resultArea').classList.remove('d-none');
-            document.getElementById('rawDownloadBtn').href = data.raw_download_url;
-            document.getElementById('processedDownloadBtn').href = data.processed_download_url;
-        } else {
-            alert('Transcription failed: ' + data.error);
+
+        if (videoFile) {
+            const ext = '.' + videoFile.name.split('.').pop().toLowerCase();
+            if (ext !== '.mp4') {
+                alert('Please select only MP4 video files.');
+                return;
+            }
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred during transcription.');
-    })
-    .finally(() => {
-        transcribeBtn.disabled = false;
-        transcribeBtn.textContent = 'Transcribe Meeting';
+
+        const formData = new FormData();
+        if (audioFile) formData.append('audio_file', audioFile);
+        if (videoFile) formData.append('video_file', videoFile);
+
+        const transcribeBtn = document.getElementById('transcribeBtn');
+        transcribeBtn.disabled = true;
+        transcribeBtn.textContent = 'Transcribing...';
+
+        fetch('/meeting/transcribe', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('resultArea').classList.remove('d-none');
+                    document.getElementById('rawDownloadBtn').href = data.raw_download_url;
+                    document.getElementById('processedDownloadBtn').href = data.processed_download_url;
+                } else {
+                    alert('Transcription failed: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during transcription.');
+            })
+            .finally(() => {
+                transcribeBtn.disabled = false;
+                transcribeBtn.textContent = 'Transcribe Meeting';
+            });
     });
-});
 </script>
 {% endblock %}
