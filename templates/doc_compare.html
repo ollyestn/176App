@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Document Comparison - Document Comparison App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Document Comparison</h1>
+        <p>Upload two Word documents to compare their content.</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Compare Documents</h5>
+            </div>
+            <div class="card-body">
+                <form id="compareForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Document 1</label>
+                            <div class="upload-area" id="uploadArea1" onclick="document.getElementById('file1').click()">
+                                <p id="file1Name" class="mb-0">Click to select a DOC or DOCX file</p>
+                                <input type="file" id="file1" name="file1" accept=".doc,.docx" class="d-none" onchange="updateFileName(1)">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Document 2</label>
+                            <div class="upload-area" id="uploadArea2" onclick="document.getElementById('file2').click()">
+                                <p id="file2Name" class="mb-0">Click to select a DOC or DOCX file</p>
+                                <input type="file" id="file2" name="file2" accept=".doc,.docx" class="d-none" onchange="updateFileName(2)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary" id="compareBtn">Compare Documents</button>
+                    </div>
+                </form>
+                <div id="resultArea" class="mt-4 d-none">
+                    <h5>Comparison Result</h5>
+                    <div class="alert alert-success">
+                        <p>Documents compared successfully!</p>
+                        <a href="#" class="btn btn-success" id="downloadBtn">Download Comparison Result</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>History</h5>
+            </div>
+            <div class="card-body">
+                {% if history_records %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Document 1</th>
+                                <th>Document 2</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in history_records %}
+                            <tr>
+                                <td>{{ record.created_at }}</td>
+                                <td>{{ record.file1_path.split('/')[-1] }}</td>
+                                <td>{{ record.file2_path.split('/')[-1] }}</td>
+                                <td>
+                                    <a href="/download/{{ record.id }}" class="btn btn-sm btn-primary">Download Result</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>No comparison history found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateFileName(fileNum) {
+    const fileInput = document.getElementById('file' + fileNum);
+    const fileNameDisplay = document.getElementById('file' + fileNum + 'Name');
+    if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = fileInput.files[0].name;
+    }
+}
+
+document.getElementById('compareForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const file1 = document.getElementById('file1').files[0];
+    const file2 = document.getElementById('file2').files[0];
+    
+    if (!file1 || !file2) {
+        alert('Please select both files to compare.');
+        return;
+    }
+    
+    // Check file extensions
+    const validExtensions = ['.doc', '.docx'];
+    const ext1 = '.' + file1.name.split('.').pop().toLowerCase();
+    const ext2 = '.' + file2.name.split('.').pop().toLowerCase();
+    
+    if (!validExtensions.includes(ext1) || !validExtensions.includes(ext2)) {
+        alert('Please select only DOC or DOCX files.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file1', file1);
+    formData.append('file2', file2);
+    
+    const compareBtn = document.getElementById('compareBtn');
+    compareBtn.disabled = true;
+    compareBtn.textContent = 'Comparing...';
+    
+    fetch('/docchk/compare', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('resultArea').classList.remove('d-none');
+            document.getElementById('downloadBtn').href = data.download_url;
+        } else {
+            alert('Comparison failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during comparison.');
+    })
+    .finally(() => {
+        compareBtn.disabled = false;
+        compareBtn.textContent = 'Compare Documents';
+    });
+});
+</script>
+{% endblock %}

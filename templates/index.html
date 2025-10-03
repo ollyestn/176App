@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Document Comparison App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Document Comparison and Meeting Transcription App</h1>
+        <p class="lead">Welcome to our application for comparing documents and transcribing meetings.</p>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Document Comparison</h5>
+                <p class="card-text">Compare two Word documents and see the differences highlighted in an Excel report.
+                </p>
+                <a href="/docchk" class="btn btn-primary">Go to Document Comparison</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Meeting Transcription</h5>
+                <p class="card-text">Upload audio or video recordings of meetings and get transcribed text with
+                    AI-powered organization.</p>
+                <a href="/meeting" class="btn btn-success">Go to Meeting Transcription</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
